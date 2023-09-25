@@ -39,12 +39,14 @@ class Ball(Block):
         self.score_time = 0
 
     def update(self):
+        global fps
         if self.active:
             self.rect.x += self.speed_x
             self.rect.y += self.speed_y
             self.collisions()
         else:
             self.restart_counter()
+            fps = 60
 
     def collisions(self):
         if self.rect.top <= 0 or self.rect.bottom >= screen_height:
@@ -175,6 +177,8 @@ basic_font = pygame.font.Font('freesansbold.ttf', 32)
 plob_sound = pygame.mixer.Sound("pong.ogg")
 score_sound = pygame.mixer.Sound("score.ogg")
 middle_strip = pygame.Rect(screen_width / 2 - 2, 0, 4, screen_height)
+paused = False
+fps = 60
 
 # Game objects
 player = Player('Paddle.png', screen_width - 20, screen_height / 2, 5)
@@ -221,6 +225,12 @@ while True:
             closed = True
             sys.exit()
 
+    keys = pygame.key.get_pressed()
+
+    if keys[pygame.K_SPACE]:
+        paused = not paused
+        pygame.time.delay(100)
+
     # if event.type == pygame.KEYDOWN:
     # 	if event.key == pygame.K_UP:
     # 		opponent.movement -= opponent.speed
@@ -243,20 +253,23 @@ while True:
             player.rect.y = int(lmList2[4][2] * screen_height)
         else:
             opponent.rect.y = int(lmList2[4][2] * screen_height)
-    #
-    # cTime = time.time()
-    # fps = 1 / (cTime - pTime)
-    # pTime = cTime
-    #
-    # cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 255, 0), 3)
 
     # Background Stuff
     screen.fill(bg_color)
     pygame.draw.rect(screen, accent_color, middle_strip)
 
     # Run the game
-    game_manager.run_game()
+    if not paused:
+        game_manager.run_game()
+    else:
+        paused_text = basic_font.render('Paused !', True, accent_color)
+        screen.blit(paused_text, (screen_width//2 - paused_text.get_width()//2,
+                            screen_height//2 - paused_text.get_height()//2))
 
     # Rendering
     pygame.display.flip()
-    clock.tick(90)
+    clock.tick(fps)
+
+    if fps <= 150:
+        fps += 0.01
+    print(fps)
