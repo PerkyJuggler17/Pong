@@ -272,4 +272,4 @@ while True:
 
     if fps <= 150:
         fps += 0.01
-    print(fps)
+    # print(fps)
