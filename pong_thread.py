@@ -139,6 +139,7 @@ class GameManager:
         self.ball_group.update()
         self.reset_ball()
         self.draw_score()
+        self.restart_game()
 
     def reset_ball(self):
         if self.ball_group.sprite.rect.right >= screen_width:
@@ -157,6 +158,24 @@ class GameManager:
 
         screen.blit(player_score, player_score_rect)
         screen.blit(opponent_score, opponent_score_rect)
+
+    def restart_game(self):
+        player_wins = basic_font.render('Right Player Won !', True, accent_color)
+        opponent_wins = basic_font.render('Right Player Won !', True, accent_color)
+
+        if self.player_score >= 5:
+            self.player_score = 0
+            self.opponent_score = 0
+            screen.blit(player_wins, (screen_width//2 - player_wins.get_width()//2, screen_height//2 - player_wins.get_height()//2))
+            pygame.display.update()
+            pygame.time.delay(5000)
+        if self.opponent_score >= 5:
+            self.player_score = 0
+            self.opponent_score = 0
+            screen.blit(opponent_wins, (
+            screen_width // 2 - opponent_wins.get_width() // 2, screen_height // 2 - opponent_wins.get_height() // 2))
+            pygame.display.update()
+            pygame.time.delay(5000)
 
 
 # General setup
@@ -201,6 +220,7 @@ detector = htm.HandDetector()
 lmList, lmList2 = [], []
 closed = False
 
+
 def opencv():
     global lmList, lmList2
     # opencv controls
@@ -214,6 +234,7 @@ def opencv():
         if closed:
             sys.exit()
 
+
 thread = Thread(target=opencv)
 
 thread.start()
@@ -224,23 +245,30 @@ while True:
             pygame.quit()
             closed = True
             sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                player.movement -= player.speed
+            if event.key == pygame.K_DOWN:
+                player.movement += player.speed
+            if event.key == pygame.K_w:
+                opponent.movement -= opponent.speed
+            if event.key == pygame.K_s:
+                opponent.movement += opponent.speed
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_UP:
+                player.movement += player.speed
+            if event.key == pygame.K_DOWN:
+                player.movement -= player.speed
+            if event.key == pygame.K_w:
+                opponent.movement += opponent.speed
+            if event.key == pygame.K_s:
+                opponent.movement -= opponent.speed
 
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_SPACE]:
         paused = not paused
         pygame.time.delay(100)
-
-    # if event.type == pygame.KEYDOWN:
-    # 	if event.key == pygame.K_UP:
-    # 		opponent.movement -= opponent.speed
-    # 	if event.key == pygame.K_DOWN:
-    # 		opponent.movement += opponent.speed
-    # if event.type == pygame.KEYUP:
-    # 	if event.key == pygame.K_UP:
-    # 		opponent.movement += opponent.speed
-    # 	if event.key == pygame.K_DOWN:
-    # 		opponent.movement -= opponent.speed
 
     if len(lmList) != 0:
         if lmList[4][1] > 0.5:
@@ -263,8 +291,8 @@ while True:
         game_manager.run_game()
     else:
         paused_text = basic_font.render('Paused !', True, accent_color)
-        screen.blit(paused_text, (screen_width//2 - paused_text.get_width()//2,
-                            screen_height//2 - paused_text.get_height()//2))
+        screen.blit(paused_text, (screen_width // 2 - paused_text.get_width() // 2,
+                                  screen_height // 2 - paused_text.get_height() // 2))
 
     # Rendering
     pygame.display.flip()
@@ -272,4 +300,4 @@ while True:
 
     if fps <= 150:
         fps += 0.01
-    # print(fps)
+    print(fps)
